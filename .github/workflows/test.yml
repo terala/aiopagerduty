@@ -28,6 +28,9 @@ jobs:
         # python-version: ["3.10", "3.11.0-rc.1"]
         python-version: ["3.10"]
 
+    env:
+      PAGERDUTY_API_KEY: ${{ PAGERDUTY_API_KEY }}
+
     steps:
       - uses: actions/checkout@v3
 
