@@ -50,7 +50,7 @@ dependencies = [
   "pytest-mock",
   "assertpy",
 ]
-detached = true
+detached = false
 dev-mode = false
 
 [tool.hatch.envs.test.scripts]
@@ -71,7 +71,7 @@ dependencies = [
   "types-urllib3",
   "typing_extensions",
 ]
-detached = true
+detached = false
 dev-mode = false
 
 [tool.hatch.envs.lint.scripts]
