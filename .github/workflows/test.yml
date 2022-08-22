@@ -52,21 +52,31 @@ jobs:
       - name: Build package
         run: hatch build
 
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: pylint
-        run: pytest
-
-      - name: Run the tests via hatch
-        run: hatch run
-
-  lint:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
       - name: Pylint
         run: pylint --enable-all-extensions aiopagerduty/*.py
       - name: mypy
         run: mypy --install-types --non-interactive aiopagerduty/*.py
+      - name: hatch test
+        run: hatch run test:cov
+
+      - name: hatch lint
+        run: hatch run lint:lint
+
+  # test:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: pylint
+  #       run: pytest
+
+  #     - name: Run the tests via hatch
+  #       run: hatch run
+
+  # lint:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Pylint
+  #       run: pylint --enable-all-extensions aiopagerduty/*.py
+  #     - name: mypy
+  #       run: mypy --install-types --non-interactive aiopagerduty/*.py
