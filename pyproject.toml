@@ -51,7 +51,7 @@ dependencies = [
   "assertpy",
 ]
 detached = true
-dev-mode = true
+dev-mode = false
 
 [tool.hatch.envs.test.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov-report=html --cov=aiopagerduty --cov=tests"
@@ -62,8 +62,6 @@ python = ["310"]
 
 [tool.hatch.envs.lint]
 dependencies = [
-  "aiohttp",
-
   "pylint",
   "pylint-pydantic",
   "mypy",
