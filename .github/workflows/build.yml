@@ -55,15 +55,11 @@ jobs:
       - name: Build package
         run: hatch build
 
-      - name: Pylint
-        run: pylint --enable-all-extensions aiopagerduty/*.py
-      - name: mypy
-        run: mypy --install-types --non-interactive aiopagerduty/*.py
       - name: hatch test
         run: hatch run test:cov
 
       - name: hatch lint
-        run: hatch run lint:lint
+        run: hatch run lint:all
 
   # test:
   #   needs: build
