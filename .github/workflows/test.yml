@@ -1,4 +1,4 @@
-name: test
+name: Build and Test
 
 on:
   push:
@@ -18,7 +18,7 @@ env:
   FORCE_COLOR: "1"
 
 jobs:
-  run:
+  build:
     name: Python ${{ matrix.python-version }} on ${{ startsWith(matrix.os, 'macos-') && 'macOS' || startsWith(matrix.os, 'windows-') && 'Windows' || 'Linux' }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -39,11 +39,33 @@ jobs:
       - name: Ensure latest pip
         run: python -m pip install --upgrade pip
 
-      - name: Install hatch
-        run: pip install hatch
+      - name: Install pre-reqs
+        run: pip install -r requirements.txt
 
-      - name: Creat test env
-        run: hatch env create test
+      - name: Create test and lint envs
+        run: |
+          hatch env create
+          hatch env create lint
+          hatch env create test
 
-      - name: Run the tests
-        run: hatch run test:cov
+      - name: Build package
+        run: hatch build
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: pylint
+        run: pytest
+
+      - name: Run the tests via hatch
+        run: hatch run
+
+  lint:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pylint
+        run: pylint --enable-all-extensions aiopagerduty/*.py
+      - name: mypy
+        run: mypy --install-types --non-interactive aiopagerduty/*.py
