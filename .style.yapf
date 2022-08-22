@@ -1,0 +1,7 @@
+[style]
+based_on_style = yapf
+spaces_before_comment = 4
+split_before_logical_operator = true
+indent_width = 4
+blank_lines_between_top_level_imports_and_variables = 1
+

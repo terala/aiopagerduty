@@ -1,0 +1,24 @@
+# Main code
+asyncio
+aiohttp
+async_lru
+aiohttp-client-cache
+pydantic[email]
+pyaml
+python-dotenv
+
+# Linters and formatters
+autopep8
+pylint
+pylint-pydantic
+mypy
+mypy-extensions
+types-pyyaml
+types-requests
+types-urllib3
+typing_extensions
+pytest
+pytest-asyncio
+assertpy
+
+hatch
