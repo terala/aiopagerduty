@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest]
         # python-version: ["3.10", "3.11.0-rc.1"]
         python-version: ["3.10"]
 
@@ -59,7 +59,7 @@ jobs:
         run: hatch run test:cov
 
       - name: hatch lint
-        run: hatch run lint:all
+        run: hatch run lint:lint
 
   # test:
   #   needs: build
