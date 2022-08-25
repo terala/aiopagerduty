@@ -1,7 +1,6 @@
 """Integrations Mixin
 """
 
-
 from aiopagerduty.fetcher import FetcherProtocol
 from aiopagerduty.models import Integration, Service, Vendor
 
@@ -9,6 +8,7 @@ from aiopagerduty.models import Integration, Service, Vendor
 class IntegrationsMixin:
     """Integrations API
     """
+
     async def list_integration(self: FetcherProtocol, service_id: str,
                                integration_id: str) -> Integration:
         url = f'services/{service_id}/integrations/{integration_id}'

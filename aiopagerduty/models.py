@@ -3,7 +3,7 @@
 
 import datetime
 from enum import Enum
-from typing import Literal
+from typing import Literal, List, Optional
 
 from pydantic import BaseModel, EmailStr
 
@@ -11,15 +11,15 @@ from pydantic import BaseModel, EmailStr
 class ObjectRef(BaseModel):
     id: str
     summary: str
-    self: str    # url
-    html_url: str | None  # Vendor does not always have a html_url defined
+    self: str  # url
+    html_url: Optional[str]  # Vendor does not always have a html_url defined
     type: str
 
 
 class SupportHours(BaseModel):
     type: str
     time_zone: str
-    days_of_week: list[int]
+    days_of_week: List[int]
     start_time: str
     end_time: str
 
@@ -34,7 +34,7 @@ class ServiceStatus(str, Enum):
 
 class Team(ObjectRef):
     name: str
-    description: str | None
+    description: Optional[str]
 
 
 # class IncidentUrgencyType(str, Enum):
@@ -53,27 +53,27 @@ class IncidentUrgencyDefinition(BaseModel):
 
 
 class IncidentUrgencyRule(IncidentUrgencyDefinition):
-    during_support_hours: IncidentUrgencyDefinition | None
-    outside_support_hours: IncidentUrgencyDefinition | None
+    during_support_hours: Optional[IncidentUrgencyDefinition]
+    outside_support_hours: Optional[IncidentUrgencyDefinition]
 
 
 class Service(ObjectRef):
     """Service defined in PagerDuty
     """
     name: str
-    description: str | None
+    description: Optional[str]
     type: str
-    auto_resolve_timeout: int | None
-    acknowledgement_timeout: int | None
+    auto_resolve_timeout: Optional[int]
+    acknowledgement_timeout: Optional[int]
     created_at: datetime.datetime
     status: ServiceStatus
-    last_incident_timestamp: datetime.datetime | None
+    last_incident_timestamp: Optional[datetime.datetime]
     escalation_policy: ObjectRef
     # response_play: Optional[ObjectRef] = None
-    teams: list[ObjectRef]
-    integrations: list[ObjectRef]
+    teams: List[ObjectRef]
+    integrations: List[ObjectRef]
     incident_urgency_rule: IncidentUrgencyRule
-    support_hours: ObjectRef | None
+    support_hours: Optional[ObjectRef]
 
     class Config:
         use_enum_values = True
@@ -83,10 +83,10 @@ class Vendor(ObjectRef):
     name: str
     type: str
     website_url: str
-    logo_url: str | None
-    thumbnail_url: str | None
-    description: str | None
-    integration_guide_url: str | None
+    logo_url: Optional[str]
+    thumbnail_url: Optional[str]
+    description: Optional[str]
+    integration_guide_url: Optional[str]
 
 
 class EmailFilterMode(str, Enum):
@@ -128,13 +128,13 @@ class Integration(ObjectRef):
     integration_key: str
     service: ObjectRef
     created_at: datetime.datetime
-    vendor: ObjectRef | None
-    integration_email: str | None
-    email_incident_creation: EmailIncidentCreation | None
-    email_filter_mode: EmailFilterMode | None
-    # email_parsers: list[EmailParser]
-    email_parsing_fallback: EmailParsingFallback | None
-    email_filters: list[EmailFilter] | None
+    vendor: Optional[ObjectRef]
+    integration_email: Optional[str]
+    email_incident_creation: Optional[EmailIncidentCreation]
+    email_filter_mode: Optional[EmailFilterMode]
+    # email_parsers: List[EmailParser]
+    email_parsing_fallback: Optional[EmailParsingFallback]
+    email_filters: Optional[List[EmailFilter]]
 
     class Config:
         use_enum_values = True
@@ -159,13 +159,13 @@ class User(ObjectRef):
     time_zone: str
     color: str
     role: UserRole
-    avatar_role: str | None
-    description: str | None
-    invitation_sent: bool | None
-    job_title: str | None
-    teams: list[ObjectRef] | None
-    contact_methods: list[ObjectRef] | None
-    notification_rules: list[ObjectRef] | None
+    avatar_role: Optional[str]
+    description: Optional[str]
+    invitation_sent: Optional[bool]
+    job_title: Optional[str]
+    teams: Optional[List[ObjectRef]]
+    contact_methods: Optional[List[ObjectRef]]
+    notification_rules: Optional[List[ObjectRef]]
 
     class Config:
         use_enum_values = True
@@ -210,14 +210,14 @@ class ConferenceType(str, Enum):
 
 class ResponsePlay(ObjectRef):
     team: Team
-    subscribers: list[ObjectRef]  # TODO: This should be User | Group?
-    subscribers_message: str | None
-    responders: list[ObjectRef] | None
-    responders_message: str | None
-    runnability: Runnability | None
-    conference_number: str | None
-    conference_url: str | None
-    conference_type: ConferenceType | None
+    subscribers: List[ObjectRef]  # TODO: This should be User | Group?
+    subscribers_message: Optional[str]
+    responders: Optional[List[ObjectRef]]
+    responders_message: Optional[str]
+    runnability: Optional[Runnability]
+    conference_number: Optional[str]
+    conference_url: Optional[str]
+    conference_type: Optional[ConferenceType]
 
 
 class ServiceOrchestrationStatus(BaseModel):
@@ -286,38 +286,39 @@ class Extraction(BaseModel):
     # eg: `High CPU on {{hostname}} server`
     template: str
 
-    source: str | None
-    regex: str | None
+    source: Optional[str]
+    regex: Optional[str]
 
 
 class Action(BaseModel):
     """Defines an action in service orchestration rules."""
-    route_to: str | None  # route_to does not exist in catch_all actions
+    route_to: Optional[str]  # route_to does not exist in catch_all actions
 
     # severity: Severity  # Severity of resulting alert
-    severity: str | None  # TODO: issue to fix.
+    severity: Optional[str]  # TODO: issue to fix.
 
     # Suppress the resulting alert
-    suppress: bool | None
+    suppress: Optional[bool]
     # Number of seconds to suspend the resuling alert before triggering
-    suspend: int | None
+    suspend: Optional[int]
 
     # Priority id for the priority defined for the account.
-    priority: str | None
+    priority: Optional[str]
     # Add text as a note to the resulting incident
-    annotate: str | None
+    annotate: Optional[str]
 
-    # Indicates whether the rule is disabled and would therefore not be evaluated.
-    disabled: bool | None
+    # Indicates whether the rule is disabled and would therefore not be
+    # evaluated.
+    disabled: Optional[bool]
 
     # Set whether the resulting alert status is trigger or resolve
-    event_action: EventAction | None
+    event_action: Optional[EventAction]
     # Populate variables from event payloads and use those variables in
     # other event actions.
-    variables: list[Variable] | None
+    variables: Optional[List[Variable]]
 
     # use a template string and variables
-    extractions: list[Extraction] | None
+    extractions: Optional[List[Extraction]]
 
     class Config:
         use_enum_values = True
@@ -329,9 +330,9 @@ class Actions(BaseModel):
 
 class Rule(BaseModel):
     id: str
-    label: str | None
-    disabled: bool | None
-    conditions: list[Condition]
+    label: Optional[str]
+    disabled: Optional[bool]
+    conditions: List[Condition]
     actions: Action
 
     class Config:
@@ -340,7 +341,7 @@ class Rule(BaseModel):
 
 class RuleSet(BaseModel):
     id: str
-    rules: list[Rule]
+    rules: List[Rule]
 
     class Config:
         use_enum_values = True
@@ -351,13 +352,13 @@ class ServiceOrchestration(BaseModel):
     """
     type: str
     parent: RefType
-    version: str | None
+    version: Optional[str]
     self: str
-    updated_at: datetime.datetime | None
-    updated_by: RefType | None
+    updated_at: Optional[datetime.datetime]
+    updated_by: Optional[RefType]
     created_at: datetime.datetime
-    created_by: RefType | None
-    sets: list[RuleSet] | None
+    created_by: Optional[RefType]
+    sets: Optional[List[RuleSet]]
     catch_all: Actions
 
     class Config:

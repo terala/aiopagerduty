@@ -6,13 +6,15 @@ build-backend = "hatchling.build"
 name = "aiopagerduty"
 description = "Asynchronous client for PagerDuty API"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.8"
 license = "MIT"
 keywords = ["pagerduty", "async"]
 authors = [{ name = "Ravi Terala", email = "terala.work@gmail.com" }]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: Implementation :: CPython",
@@ -21,6 +23,7 @@ classifiers = [
 dependencies = [
   "asyncio",
   "aiohttp",
+  "aiodns",
   "async_lru",
   "aiohttp-client-cache",
   "pydantic[email]",
@@ -58,7 +61,11 @@ cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov-report
 no-cov = "cov --no-cov"
 
 [[tool.hatch.envs.test.matrix]]
-python = ["310"]
+python = ["38", "39", "310"]
+
+[tool.hatch.envs.test.overrides]
+name.py311.env-vars = ["MULTIDICT_NO_EXTENSIONS=1", "YARL_NO_EXTENSIONS=1"]
+
 
 [tool.hatch.envs.lint]
 dependencies = [

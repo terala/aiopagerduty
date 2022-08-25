@@ -1,18 +1,19 @@
 """Vendors Mixin
 """
 
-
 from async_lru import alru_cache
 
 from aiopagerduty.fetcher import FetcherProtocol
 from aiopagerduty.models import Vendor
+from typing import List
 
 
 class VendorsMixin:
     """Vendors API Mixin
     """
+
     @alru_cache(maxsize=5)
-    async def list_vendors(self: FetcherProtocol) -> list[Vendor]:
+    async def list_vendors(self: FetcherProtocol) -> List[Vendor]:
         """List of vendors with integrations.
         This list is cached since there are more than 400 vendors defined in the system.
         """
