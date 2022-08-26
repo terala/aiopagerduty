@@ -14,3 +14,5 @@ runs:
     - name: "Creating test.${{ inputs.python-version }}"
       run: hatch env create "test.py${{ python-version }}"
       shell: sh
+      with:
+        python-version: ${{ inputs.python-version }}
