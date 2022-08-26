@@ -35,7 +35,7 @@ jobs:
       - uses: actions/setup-pythonversion
 
       - name: Build package
-        run: "Run"
+        run: "hatch build"
 
   test:
     name: Python ${{ matrix.python-version }} on ${{ startsWith(matrix.os, 'macos-') && 'macOS' || startsWith(matrix.os, 'windows-') && 'Windows' || 'Linux' }}
