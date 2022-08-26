@@ -57,8 +57,9 @@ detached = false
 dev-mode = false
 
 [tool.hatch.envs.test.scripts]
-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov-report=html --cov=aiopagerduty --cov=tests"
+htmlcov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov-report=html --cov=aiopagerduty --cov=tests"
 no-cov = "cov --no-cov"
+cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=aiopagerduty --cov=tests --cov-report=xml"
 
 [[tool.hatch.envs.test.matrix]]
 python = ["3.8", "3.9", "3.10"]
