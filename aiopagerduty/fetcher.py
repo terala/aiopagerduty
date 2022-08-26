@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 _URL_PREFIX = 'https://api.pagerduty.com'
 
-TBaseModel = TypeVar('TBaseModel', bound=BaseModel)
+BaseModelT = TypeVar('BaseModelT', bound=BaseModel)
 
 _logger = logging.getLogger(__name__)
 
@@ -116,8 +116,8 @@ class Fetcher:
                               })
                 raise Error(resp.reason, resp.status)
 
-    async def multi_fetch(self, model_type: Type[TBaseModel], url_part: str,
-                          items_name: str) -> List[TBaseModel]:
+    async def multi_fetch(self, model_type: Type[BaseModelT], url_part: str,
+                          items_name: str) -> List[BaseModelT]:
         """Fetch a list of type paging if needed.
 
         Args:
@@ -129,7 +129,7 @@ class Fetcher:
         Returns:
             List[TBaseModel]: List of items
         """
-        return_val: List[TBaseModel] = []
+        return_val: List[BaseModelT] = []
         fetch: bool = True
         offset = 0
         limit = 100
@@ -143,14 +143,14 @@ class Fetcher:
                 return_val.append(item)
         return return_val
 
-    async def single_fetch(self, model_type: Type[TBaseModel], url: str,
-                           item_name: str) -> TBaseModel:
+    async def single_fetch(self, model_type: Type[BaseModelT], url: str,
+                           item_name: str) -> BaseModelT:
         json_obj = await self.fetch_json_result(url)
         model = model_type(**json_obj[item_name])
         return model
 
-    async def object_fetch(self, model_type: Type[TBaseModel],
-                           url: str) -> TBaseModel:
+    async def object_fetch(self, model_type: Type[BaseModelT],
+                           url: str) -> BaseModelT:
         json_obj = await self.fetch_json_result(url)
         model = model_type(**json_obj)
         return model
@@ -170,11 +170,11 @@ class FetcherProtocol(Protocol):
 
     async def delete(self, url: str, expected_status: HTTPStatus) -> None: ...
 
-    async def multi_fetch(self, model_type: Type[TBaseModel], url_part: str,
-                          items_name: str) -> List[TBaseModel]: ...
+    async def multi_fetch(self, model_type: Type[BaseModelT], url_part: str,
+                          items_name: str) -> List[BaseModelT]: ...
 
-    async def single_fetch(self, model_type: Type[TBaseModel], url: str,
-                           item_name: str) -> TBaseModel: ...
+    async def single_fetch(self, model_type: Type[BaseModelT], url: str,
+                           item_name: str) -> BaseModelT: ...
 
-    async def object_fetch(self, model_type: Type[TBaseModel],
-                           url: str) -> TBaseModel: ...
+    async def object_fetch(self, model_type: Type[BaseModelT],
+                           url: str) -> BaseModelT: ...
