@@ -6,7 +6,7 @@ from http import HTTPStatus
 from typing import Any, Dict, List, Optional
 
 from aiopagerduty.fetcher import FetcherProtocol
-from aiopagerduty.models import ResponsePlay, User
+from aiopagerduty.models import ResponsePlay, User, UserInfo
 
 
 class UsersMixin:
@@ -23,8 +23,25 @@ class UsersMixin:
         url = f'users/{user.id}'
         await self.delete(url, HTTPStatus.NO_CONTENT)
 
-    async def create_user(self: FetcherProtocol, iser_name: str, email: str) -> User:
-        url = f'users'
+    async def create_user(self: FetcherProtocol, user_info: UserInfo) -> User:
+        url = 'users'
+        data = {
+            'user': user_info.dict(exclude_unset=True),
+        }
+        user_json = await self.post_json_result(url, data=data)
+        user = User(**user_json['user'])
+        return user
+
+    async def update_user(self: FetcherProtocol, user: User) -> User:
+        url = f'users/{user.id}'
+        user_info = UserInfo(**user.dict(exclude_unset=True,
+                                         exclude_none=True))
+        data = {
+            'user': user_info.dict(exclude_unset=True)
+        }
+        updated_json = await self.put_json_result(url, data=data)
+        updated = User(**updated_json['user'])
+        return updated
 
         # Response Plays
 

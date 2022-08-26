@@ -2,6 +2,7 @@
 """
 
 import json
+import logging
 from http import HTTPStatus
 from typing import Any, Dict, List, Optional, Protocol, Type, TypeVar
 
@@ -11,6 +12,8 @@ from pydantic import BaseModel
 _URL_PREFIX = 'https://api.pagerduty.com'
 
 TBaseModel = TypeVar('TBaseModel', bound=BaseModel)
+
+_logger = logging.getLogger(__name__)
 
 
 class Error(aiohttp.ClientError):
@@ -27,6 +30,9 @@ class Error(aiohttp.ClientError):
         aiohttp.ClientError.__init__(self)
         self._msg = message
         self._status = status
+
+    def __str__(self) -> str:
+        return f'Error: status: {self._status}, message: {self._msg}'
 
     @property
     def message(self) -> Optional[str]:
@@ -64,6 +70,10 @@ class Fetcher:
         async with self._session.get(u) as resp:
             data: str = await resp.text()
             if resp.status != HTTPStatus.OK:
+                _logger.error('Error posting', extra={
+                              'message': resp.reason,
+                              'status': resp.status,
+                              })
                 raise Error(resp.reason, resp.status)
             obj: Dict[str, Any] = json.loads(data)
             return obj
@@ -74,6 +84,10 @@ class Fetcher:
         async with self._session.post(u, json=data) as resp:
             resp_data: str = await resp.text()
             if resp.status != HTTPStatus.CREATED:
+                _logger.error('Error posting', extra={
+                              'message': resp.reason,
+                              'status': resp.status,
+                              })
                 raise Error(resp.reason, resp.status)
             obj: Dict[str, Any] = json.loads(resp_data)
             return obj
@@ -84,6 +98,10 @@ class Fetcher:
         async with self._session.put(u, json=data) as resp:
             resp_data: str = await resp.text()
             if resp.status != HTTPStatus.OK:
+                _logger.error('Error posting', extra={
+                    'message': resp.reason,
+                    'status': resp.status,
+                })
                 raise Error(resp.reason, resp.status)
             obj: Dict[str, Any] = json.loads(resp_data)
             return obj
@@ -92,6 +110,10 @@ class Fetcher:
         u = f'{_URL_PREFIX}/{url}'
         async with self._session.delete(u) as resp:
             if resp.status != expected_status:
+                _logger.error('Error posting', extra={
+                              'message': resp.reason,
+                              'status': resp.status,
+                              })
                 raise Error(resp.reason, resp.status)
 
     async def multi_fetch(self, model_type: Type[TBaseModel], url_part: str,

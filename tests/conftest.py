@@ -63,12 +63,11 @@ def subject_service(pd_services: Dict[str, aiopagerduty.Service],
 
 @pytest_asyncio.fixture(name="user", scope="session")
 async def pd_user(pd: aiopagerduty.Client) -> aiopagerduty.User:
-    user_info = UserInfo(data={
+    data = {
         "name": "Automation User",
         "email": "noreply@terala.net",
-    })
-    # user_info.name = "Automation User"
-    # user_info.email = "noreply@terala.net"
+    }
+    user_info = UserInfo(**data)
     user_info.role = UserRole.USER
     _logger.info(f"Creating user : {user_info.name} ...")
     user = await pd.create_user(user_info)

@@ -5,7 +5,7 @@ import datetime
 from enum import Enum
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, EmailStr, constr
+from pydantic import BaseModel, ConstrainedStr, EmailStr
 
 
 class ObjectRef(BaseModel):
@@ -151,8 +151,12 @@ class UserRole(str, Enum):
     USER = 'user'
 
 
+class UserName(ConstrainedStr):
+    max_length = 100
+
+
 class UserInfo(BaseModel):
-    name: constr(max_length=100)
+    name: UserName
     email: EmailStr
     # time_zone: datetime.tzinfo
     time_zome: Optional[str]
