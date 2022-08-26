@@ -2,7 +2,8 @@
 """
 
 import json
-from typing import Any, Dict, Type, List, Optional, Protocol, TypeVar
+from http import HTTPStatus
+from typing import Any, Dict, List, Optional, Protocol, Type, TypeVar
 
 import aiohttp
 from pydantic import BaseModel
@@ -62,7 +63,7 @@ class Fetcher:
         u = f'{_URL_PREFIX}/{url}'
         async with self._session.get(u) as resp:
             data: str = await resp.text()
-            if resp.status != 200:
+            if resp.status != HTTPStatus.OK:
                 raise Error(resp.reason, resp.status)
             obj: Dict[str, Any] = json.loads(data)
             return obj
@@ -72,7 +73,7 @@ class Fetcher:
         u = f'{_URL_PREFIX}/{url}'
         async with self._session.post(u, json=data) as resp:
             resp_data: str = await resp.text()
-            if resp.status != 201:
+            if resp.status != HTTPStatus.CREATED:
                 raise Error(resp.reason, resp.status)
             obj: Dict[str, Any] = json.loads(resp_data)
             return obj
@@ -82,10 +83,16 @@ class Fetcher:
         u = f'{_URL_PREFIX}/{url}'
         async with self._session.put(u, json=data) as resp:
             resp_data: str = await resp.text()
-            if resp.status != 200:
+            if resp.status != HTTPStatus.OK:
                 raise Error(resp.reason, resp.status)
             obj: Dict[str, Any] = json.loads(resp_data)
             return obj
+
+    async def delete(self, url: str, expected_status: HTTPStatus) -> None:
+        u = f'{_URL_PREFIX}/{url}'
+        async with self._session.delete(u) as resp:
+            if resp.status != expected_status:
+                raise Error(resp.reason, resp.status)
 
     async def multi_fetch(self, model_type: Type[TBaseModel], url_part: str,
                           items_name: str) -> List[TBaseModel]:
@@ -131,25 +138,21 @@ class FetcherProtocol(Protocol):
     """Forward declarations for mypy
     """
 
-    async def fetch_json_result(self, url: str) -> Dict[str, Any]:
-        ...
+    async def fetch_json_result(self, url: str) -> Dict[str, Any]: ...
 
     async def post_json_result(self, url: str,
-                               data: Dict[str, Any]) -> Dict[str, Any]:
-        ...
+                               data: Dict[str, Any]) -> Dict[str, Any]: ...
 
     async def put_json_result(self, url: str,
-                              data: Dict[str, Any]) -> Dict[str, Any]:
-        ...
+                              data: Dict[str, Any]) -> Dict[str, Any]: ...
+
+    async def delete(self, url: str, expected_status: HTTPStatus) -> None: ...
 
     async def multi_fetch(self, model_type: Type[TBaseModel], url_part: str,
-                          items_name: str) -> List[TBaseModel]:
-        ...
+                          items_name: str) -> List[TBaseModel]: ...
 
     async def single_fetch(self, model_type: Type[TBaseModel], url: str,
-                           item_name: str) -> TBaseModel:
-        ...
+                           item_name: str) -> TBaseModel: ...
 
     async def object_fetch(self, model_type: Type[TBaseModel],
-                           url: str) -> TBaseModel:
-        ...
+                           url: str) -> TBaseModel: ...

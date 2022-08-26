@@ -5,7 +5,7 @@ import datetime
 from enum import Enum
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, constr
 
 
 class ObjectRef(BaseModel):
@@ -151,18 +151,22 @@ class UserRole(str, Enum):
     USER = 'user'
 
 
-class User(ObjectRef):
-    """PagerDuty user and their configuration settings.
-    """
+class UserInfo(BaseModel):
+    name: constr(max_length=100)
     email: EmailStr
     # time_zone: datetime.tzinfo
-    time_zone: str
-    color: str
-    role: UserRole
-    avatar_role: Optional[str]
+    time_zome: Optional[str]
     description: Optional[str]
-    invitation_sent: Optional[bool]
     job_title: Optional[str]
+    color: Optional[str]
+    role: Optional[UserRole]
+
+
+class User(ObjectRef, UserInfo):
+    """PagerDuty user and their configuration settings.
+    """
+    avatar_role: Optional[str]
+    invitation_sent: Optional[bool]
     teams: Optional[List[ObjectRef]]
     contact_methods: Optional[List[ObjectRef]]
     notification_rules: Optional[List[ObjectRef]]
@@ -366,8 +370,8 @@ class ServiceOrchestration(BaseModel):
 
 
 class HandoffNotifications(str, Enum):
-    IF_HAS_SERVICES = "if_has_services"
-    ALWAYS = "always"
+    IF_HAS_SERVICES = 'if_has_services'
+    ALWAYS = 'always'
 
 
 class EscalationRule(BaseModel):
@@ -378,6 +382,8 @@ class EscalationRule(BaseModel):
 
 
 class EscalationPolicy(ObjectRef):
+    """Escalation Policy"""
+
     # The name of the escalation policy.
     name: str
     # Escalation policy description.

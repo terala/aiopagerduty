@@ -2,6 +2,7 @@
 """
 
 import urllib
+from http import HTTPStatus
 from typing import Any, Dict, List, Optional
 
 from aiopagerduty.fetcher import FetcherProtocol
@@ -15,7 +16,17 @@ class UsersMixin:
     async def list_user(self: FetcherProtocol, user_id: str) -> User:
         return await self.single_fetch(User, f'users/{user_id}', 'user')
 
-    # Response Plays
+    async def list_users(self: FetcherProtocol) -> List[User]:
+        return await self.multi_fetch(User, 'users', 'users')
+
+    async def delete_user(self: FetcherProtocol, user: User) -> None:
+        url = f'users/{user.id}'
+        await self.delete(url, HTTPStatus.NO_CONTENT)
+
+    async def create_user(self: FetcherProtocol, iser_name: str, email: str) -> User:
+        url = f'users'
+
+        # Response Plays
 
     async def list_response_plays(self: FetcherProtocol,
                                   query: Optional[str] = None,

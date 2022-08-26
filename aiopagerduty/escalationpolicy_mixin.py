@@ -15,6 +15,6 @@ class EscalationPolicyMixin:
         url = "escalation_policies"
         return await self.multi_fetch(EscalationPolicy, url, "escalation_policies")
 
-    async def list_escalation_policy(self: FetcherProtocol, id: str) -> EscalationPolicy:
-        url = f"escalation_policies/{id}"
+    async def list_escalation_policy(self: FetcherProtocol, ep_id: str) -> EscalationPolicy:
+        url = f"escalation_policies/{ep_id}"
         return await self.single_fetch(EscalationPolicy, url, "escalation_policy")
