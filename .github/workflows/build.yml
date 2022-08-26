@@ -72,7 +72,7 @@ jobs:
         run: hatch run +py=${{ matrix.python-version }} test:cov
 
       - name: Upload to codecov
-        uses: codecov/codedov-action@v3
+        uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
