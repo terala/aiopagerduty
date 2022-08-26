@@ -2,7 +2,7 @@
 
 import asyncio
 import os
-from typing import AsyncGenerator, cast
+from typing import AsyncGenerator, cast, Dict
 
 import aiopagerduty
 import pytest_asyncio
@@ -40,16 +40,16 @@ async def pd_client(pd_api_key: str) -> AsyncGenerator[aiopagerduty.Client, None
 
 
 @pytest_asyncio.fixture(name="pd_services", scope="session")
-async def aiopagerduty_services(pd: aiopagerduty.Client) -> dict[str, aiopagerduty.Service]:
+async def aiopagerduty_services(pd: aiopagerduty.Client) -> Dict[str, aiopagerduty.Service]:
     svcs = await pd.list_services()
-    services: dict[str, aiopagerduty.Service] = {}
+    services: Dict[str, aiopagerduty.Service] = {}
     for s in svcs:
         services[s.name] = s
     return services
 
 
 @pytest_asyncio.fixture(name="service", scope="session")
-def subject_service(pd_services: dict[str, aiopagerduty.Service],
+def subject_service(pd_services: Dict[str, aiopagerduty.Service],
                     service_name: str) -> aiopagerduty.Service:
     assert_that(pd_services).contains_key(service_name)
     svc = pd_services[service_name]

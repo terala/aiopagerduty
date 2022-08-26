@@ -2,7 +2,7 @@
 """
 
 import json
-from typing import Any, Protocol, TypeVar
+from typing import Any, Dict, Type, List, Optional, Protocol, TypeVar
 
 import aiohttp
 from pydantic import BaseModel
@@ -16,7 +16,7 @@ class Error(aiohttp.ClientError):
     """PagerDuty error.
     """
 
-    def __init__(self, message: str | None, status: int):
+    def __init__(self, message: Optional[str], status: int):
         """Constructor
 
         Args:
@@ -28,7 +28,7 @@ class Error(aiohttp.ClientError):
         self._status = status
 
     @property
-    def message(self) -> str | None:
+    def message(self) -> Optional[str]:
         return self._msg
 
     @property
@@ -58,47 +58,49 @@ class Fetcher:
     async def __aexit__(self, *args: Any) -> None:
         await self._session.close()
 
-    async def fetch_json_result(self, url: str) -> dict[str, Any]:
+    async def fetch_json_result(self, url: str) -> Dict[str, Any]:
         u = f'{_URL_PREFIX}/{url}'
         async with self._session.get(u) as resp:
             data: str = await resp.text()
             if resp.status != 200:
                 raise Error(resp.reason, resp.status)
-            obj: dict[str, Any] = json.loads(data)
+            obj: Dict[str, Any] = json.loads(data)
             return obj
 
-    async def post_json_result(self, url: str, data: dict[str, Any]) -> dict[str, Any]:
+    async def post_json_result(self, url: str,
+                               data: Dict[str, Any]) -> Dict[str, Any]:
         u = f'{_URL_PREFIX}/{url}'
         async with self._session.post(u, json=data) as resp:
             resp_data: str = await resp.text()
             if resp.status != 201:
                 raise Error(resp.reason, resp.status)
-            obj: dict[str, Any] = json.loads(resp_data)
+            obj: Dict[str, Any] = json.loads(resp_data)
             return obj
 
-    async def put_json_result(self, url: str, data: dict[str, Any]) -> dict[str, Any]:
+    async def put_json_result(self, url: str,
+                              data: Dict[str, Any]) -> Dict[str, Any]:
         u = f'{_URL_PREFIX}/{url}'
         async with self._session.put(u, json=data) as resp:
             resp_data: str = await resp.text()
             if resp.status != 200:
                 raise Error(resp.reason, resp.status)
-            obj: dict[str, Any] = json.loads(resp_data)
+            obj: Dict[str, Any] = json.loads(resp_data)
             return obj
 
-    async def multi_fetch(self, model_type: type[TBaseModel],
-                          url_part: str, items_name: str) -> list[TBaseModel]:
+    async def multi_fetch(self, model_type: Type[TBaseModel], url_part: str,
+                          items_name: str) -> List[TBaseModel]:
         """Fetch a list of type paging if needed.
 
         Args:
-            model_type (type[TBaseModel]): Class of the return type
+            model_type (Type[TBaseModel]): Class of the return type
             url_part (str): Url part to make a query against
             items_name (str): Name of the items within the return json
                               that contains the items.
 
         Returns:
-            list[TBaseModel]: List of items
+            List[TBaseModel]: List of items
         """
-        return_val: list[TBaseModel] = []
+        return_val: List[TBaseModel] = []
         fetch: bool = True
         offset = 0
         limit = 100
@@ -112,13 +114,13 @@ class Fetcher:
                 return_val.append(item)
         return return_val
 
-    async def single_fetch(self, model_type: type[TBaseModel],
-                           url: str, item_name: str) -> TBaseModel:
+    async def single_fetch(self, model_type: Type[TBaseModel], url: str,
+                           item_name: str) -> TBaseModel:
         json_obj = await self.fetch_json_result(url)
         model = model_type(**json_obj[item_name])
         return model
 
-    async def object_fetch(self, model_type: type[TBaseModel],
+    async def object_fetch(self, model_type: Type[TBaseModel],
                            url: str) -> TBaseModel:
         json_obj = await self.fetch_json_result(url)
         model = model_type(**json_obj)
@@ -128,19 +130,26 @@ class Fetcher:
 class FetcherProtocol(Protocol):
     """Forward declarations for mypy
     """
-    async def fetch_json_result(self, url: str) -> dict[str, Any]: ...
 
-    async def post_json_result(
-        self, url: str, data: dict[str, Any]) -> dict[str, Any]: ...
+    async def fetch_json_result(self, url: str) -> Dict[str, Any]:
+        ...
 
-    async def put_json_result(
-        self, url: str, data: dict[str, Any]) -> dict[str, Any]: ...
+    async def post_json_result(self, url: str,
+                               data: Dict[str, Any]) -> Dict[str, Any]:
+        ...
 
-    async def multi_fetch(self, model_type: type[TBaseModel],
-                          url_part: str, items_name: str) -> list[TBaseModel]: ...
+    async def put_json_result(self, url: str,
+                              data: Dict[str, Any]) -> Dict[str, Any]:
+        ...
 
-    async def single_fetch(self, model_type: type[TBaseModel],
-                           url: str, item_name: str) -> TBaseModel: ...
+    async def multi_fetch(self, model_type: Type[TBaseModel], url_part: str,
+                          items_name: str) -> List[TBaseModel]:
+        ...
 
-    async def object_fetch(self, model_type: type[TBaseModel],
-                           url: str) -> TBaseModel: ...
+    async def single_fetch(self, model_type: Type[TBaseModel], url: str,
+                           item_name: str) -> TBaseModel:
+        ...
+
+    async def object_fetch(self, model_type: Type[TBaseModel],
+                           url: str) -> TBaseModel:
+        ...

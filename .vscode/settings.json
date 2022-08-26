@@ -23,5 +23,6 @@
   },
   "python.terminal.activateEnvInCurrentTerminal": true,
   "python.terminal.activateEnvironment": true,
-  "autoDocstring.startOnNewLine": true
+  "autoDocstring.startOnNewLine": true,
+  "python.linting.mypyCategorySeverity.error": "Information"
 }

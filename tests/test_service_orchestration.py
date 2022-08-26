@@ -1,7 +1,7 @@
 """Unit tests for Service Orchestration
 """
 import json
-from typing import Callable, TypeVar
+from typing import Callable, TypeVar, Optional, List, Dict
 
 import aiopagerduty
 import pytest
@@ -13,14 +13,14 @@ TArg = TypeVar("TArg")
 TResult = TypeVar("TResult")
 
 
-def find_matching(arr: list[T], pred_fn: Callable[[T], bool]) -> T | None:
+def find_matching(arr: List[T], pred_fn: Callable[[T], bool]) -> Optional[T]:
     for x in arr:
         if pred_fn(x) is True:
             return x
     return None
 
 
-def find_matching_or_throw(arr: list[T], pred_fn: Callable[[T], bool]) -> T:
+def find_matching_or_throw(arr: List[T], pred_fn: Callable[[T], bool]) -> T:
     val: T | None = find_matching(arr, pred_fn)
     if val is None:
         raise LookupError()
@@ -155,7 +155,7 @@ async def test_load_service_orchestrations(pd: aiopagerduty.Client,
 @pytest.mark.parametrize("svc_name,active", [
     ("Test Service", True)])
 async def test_service_orchestration_status(pd: aiopagerduty.Client,
-                                            pd_services: dict[str, aiopagerduty.Service],
+                                            pd_services: Dict[str, aiopagerduty.Service],
                                             svc_name: str, active: bool) -> None:
     assert_that(pd_services).contains_key(svc_name)
     svc = pd_services[svc_name]
