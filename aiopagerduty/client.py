@@ -1,6 +1,7 @@
 """aiopagerduty Client module
 """
 
+from aiopagerduty.escalationpolicy_mixin import EscalationPolicyMixin
 from aiopagerduty.fetcher import Fetcher
 from aiopagerduty.integrations_mixin import IntegrationsMixin
 from aiopagerduty.prioritites_mixin import PrioritiesMixin
@@ -13,6 +14,7 @@ from aiopagerduty.vendors_mixin import VendorsMixin
 
 class Client(ServiceOrchestrationsMixin, VendorsMixin, PrioritiesMixin,
              TeamsMixin, ServicesMixin, UsersMixin, IntegrationsMixin,
+             EscalationPolicyMixin,
              Fetcher):
     """aiopagerduty Client API
     """

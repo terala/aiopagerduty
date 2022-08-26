@@ -2,7 +2,9 @@
 """
 
 import json
-from typing import Any, Dict, Type, List, Optional, Protocol, TypeVar
+import logging
+from http import HTTPStatus
+from typing import Any, Dict, List, Optional, Protocol, Type, TypeVar
 
 import aiohttp
 from pydantic import BaseModel
@@ -10,6 +12,8 @@ from pydantic import BaseModel
 _URL_PREFIX = 'https://api.pagerduty.com'
 
 TBaseModel = TypeVar('TBaseModel', bound=BaseModel)
+
+_logger = logging.getLogger(__name__)
 
 
 class Error(aiohttp.ClientError):
@@ -26,6 +30,9 @@ class Error(aiohttp.ClientError):
         aiohttp.ClientError.__init__(self)
         self._msg = message
         self._status = status
+
+    def __str__(self) -> str:
+        return f'Error: status: {self._status}, message: {self._msg}'
 
     @property
     def message(self) -> Optional[str]:
@@ -62,7 +69,11 @@ class Fetcher:
         u = f'{_URL_PREFIX}/{url}'
         async with self._session.get(u) as resp:
             data: str = await resp.text()
-            if resp.status != 200:
+            if resp.status != HTTPStatus.OK:
+                _logger.error('Error posting', extra={
+                              'message': resp.reason,
+                              'status': resp.status,
+                              })
                 raise Error(resp.reason, resp.status)
             obj: Dict[str, Any] = json.loads(data)
             return obj
@@ -72,7 +83,11 @@ class Fetcher:
         u = f'{_URL_PREFIX}/{url}'
         async with self._session.post(u, json=data) as resp:
             resp_data: str = await resp.text()
-            if resp.status != 201:
+            if resp.status != HTTPStatus.CREATED:
+                _logger.error('Error posting', extra={
+                              'message': resp.reason,
+                              'status': resp.status,
+                              })
                 raise Error(resp.reason, resp.status)
             obj: Dict[str, Any] = json.loads(resp_data)
             return obj
@@ -82,10 +97,24 @@ class Fetcher:
         u = f'{_URL_PREFIX}/{url}'
         async with self._session.put(u, json=data) as resp:
             resp_data: str = await resp.text()
-            if resp.status != 200:
+            if resp.status != HTTPStatus.OK:
+                _logger.error('Error posting', extra={
+                    'message': resp.reason,
+                    'status': resp.status,
+                })
                 raise Error(resp.reason, resp.status)
             obj: Dict[str, Any] = json.loads(resp_data)
             return obj
+
+    async def delete(self, url: str, expected_status: HTTPStatus) -> None:
+        u = f'{_URL_PREFIX}/{url}'
+        async with self._session.delete(u) as resp:
+            if resp.status != expected_status:
+                _logger.error('Error posting', extra={
+                              'message': resp.reason,
+                              'status': resp.status,
+                              })
+                raise Error(resp.reason, resp.status)
 
     async def multi_fetch(self, model_type: Type[TBaseModel], url_part: str,
                           items_name: str) -> List[TBaseModel]:
@@ -131,25 +160,21 @@ class FetcherProtocol(Protocol):
     """Forward declarations for mypy
     """
 
-    async def fetch_json_result(self, url: str) -> Dict[str, Any]:
-        ...
+    async def fetch_json_result(self, url: str) -> Dict[str, Any]: ...
 
     async def post_json_result(self, url: str,
-                               data: Dict[str, Any]) -> Dict[str, Any]:
-        ...
+                               data: Dict[str, Any]) -> Dict[str, Any]: ...
 
     async def put_json_result(self, url: str,
-                              data: Dict[str, Any]) -> Dict[str, Any]:
-        ...
+                              data: Dict[str, Any]) -> Dict[str, Any]: ...
+
+    async def delete(self, url: str, expected_status: HTTPStatus) -> None: ...
 
     async def multi_fetch(self, model_type: Type[TBaseModel], url_part: str,
-                          items_name: str) -> List[TBaseModel]:
-        ...
+                          items_name: str) -> List[TBaseModel]: ...
 
     async def single_fetch(self, model_type: Type[TBaseModel], url: str,
-                           item_name: str) -> TBaseModel:
-        ...
+                           item_name: str) -> TBaseModel: ...
 
     async def object_fetch(self, model_type: Type[TBaseModel],
-                           url: str) -> TBaseModel:
-        ...
+                           url: str) -> TBaseModel: ...

@@ -1,16 +1,20 @@
 """aiopagerduty module tests"""
 
 import asyncio
+import logging
 import os
-from typing import AsyncGenerator, cast, Dict
+from typing import AsyncGenerator, Dict, cast
 
 import aiopagerduty
 import pytest_asyncio
+from aiopagerduty.models import UserInfo, UserRole
 from assertpy import assert_that
 from dotenv import load_dotenv
 from pytest import fixture
 
 API_KEY_NAME = "PAGERDUTY_API_KEY"
+
+_logger = logging.getLogger(__name__)
 
 
 @fixture(name="pd_api_key", scope="session")
@@ -55,3 +59,20 @@ def subject_service(pd_services: Dict[str, aiopagerduty.Service],
     svc = pd_services[service_name]
     assert_that(svc).is_not_none()
     return svc
+
+
+@pytest_asyncio.fixture(name="user", scope="session")
+async def pd_user(pd: aiopagerduty.Client) -> aiopagerduty.User:
+    data = {
+        "name": "Automation User",
+        "email": "noreply@terala.net",
+    }
+    user_info = UserInfo(**data)
+    user_info.role = UserRole.USER
+    _logger.info(f"Creating user : {user_info.name} ...")
+    user = await pd.create_user(user_info)
+
+    yield user
+
+    _logger.info(f"Deleting user: {user.name} ...")
+    await pd.delete_user(user)

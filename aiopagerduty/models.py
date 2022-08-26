@@ -3,9 +3,9 @@
 
 import datetime
 from enum import Enum
-from typing import Literal, List, Optional
+from typing import List, Literal, Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConstrainedStr, EmailStr
 
 
 class ObjectRef(BaseModel):
@@ -151,18 +151,26 @@ class UserRole(str, Enum):
     USER = 'user'
 
 
-class User(ObjectRef):
-    """PagerDuty user and their configuration settings.
-    """
+class UserName(ConstrainedStr):
+    max_length = 100
+
+
+class UserInfo(BaseModel):
+    name: UserName
     email: EmailStr
     # time_zone: datetime.tzinfo
-    time_zone: str
-    color: str
-    role: UserRole
-    avatar_role: Optional[str]
+    time_zome: Optional[str]
     description: Optional[str]
-    invitation_sent: Optional[bool]
     job_title: Optional[str]
+    color: Optional[str]
+    role: Optional[UserRole]
+
+
+class User(ObjectRef, UserInfo):
+    """PagerDuty user and their configuration settings.
+    """
+    avatar_role: Optional[str]
+    invitation_sent: Optional[bool]
     teams: Optional[List[ObjectRef]]
     contact_methods: Optional[List[ObjectRef]]
     notification_rules: Optional[List[ObjectRef]]
@@ -360,6 +368,42 @@ class ServiceOrchestration(BaseModel):
     created_by: Optional[RefType]
     sets: Optional[List[RuleSet]]
     catch_all: Actions
+
+    class Config:
+        use_enum_values = True
+
+
+class HandoffNotifications(str, Enum):
+    IF_HAS_SERVICES = 'if_has_services'
+    ALWAYS = 'always'
+
+
+class EscalationRule(BaseModel):
+    id: str
+    escalation_delay_in_minutes: int
+    # The targets an incident should be assigned to upon reaching this rule.
+    targets: List[ObjectRef]
+
+
+class EscalationPolicy(ObjectRef):
+    """Escalation Policy"""
+
+    # The name of the escalation policy.
+    name: str
+    # Escalation policy description.
+    description: Optional[str]
+    # The number of times the escalation policy will repeat after reaching
+    # the end of its escalation.
+    # Default: 0
+    num_loops: Optional[int]
+
+    # Determines how on call handoff notifications will be sent for users on
+    # the escalation policy. Defaults to "if_has_services".
+    on_call_handoff_notifications: HandoffNotifications
+
+    escalation_rules: List[EscalationRule]
+    services: Optional[List[ObjectRef]]
+    teams: Optional[List[ObjectRef]]
 
     class Config:
         use_enum_values = True
