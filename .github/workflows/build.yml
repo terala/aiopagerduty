@@ -43,43 +43,33 @@ jobs:
       - name: Build package
         run: "hatch build"
 
-  # test:
-  #   name: Python ${{ matrix.python-version }} on ${{ startsWith(matrix.os, 'macos-') && 'macOS' || startsWith(matrix.os, 'windows-') && 'Windows' || 'Linux' }}
-  #   needs: build
-  #   runs-on: ${{ matrix.os }}
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       os: [ubuntu-latest, macos-latest]
-  #       python-version: ["3.8", "3.9", "3.10"]
-  #   env:
-  #     PAGERDUTY_API_KEY: ${{ secrets.PAGERDUTY_API_KEY }}
+  test:
+    name: Python ${{ matrix.python-version }} on ${{ startsWith(matrix.os, 'macos-') && 'macOS' || startsWith(matrix.os, 'windows-') && 'Windows' || 'Linux' }}
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.8", "3.9", "3.10"]
+    env:
+      PAGERDUTY_API_KEY: ${{ secrets.PAGERDUTY_API_KEY }}
 
-  #   steps:
-  #     - uses: actions/checkout@v3
+    steps:
+      - uses: actions/checkout@v3
 
-  #     - name: Set up Python ${{ matrix.python-version }}
-  #       uses: actions/setup-python@v4
-  #       with:
-  #         python-version: ${{ matrix.python-version }}
-  #         cache: "pip"
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
 
-  #     - uses: actions/setup_hatch
-  #       with:
-  #         python-version: ${{ matrix.python-version }}
+      - uses: ./.github/actions/setup-hatch
+        with:
+          python-version: ${{ matrix.python-version }}
 
-  #     - name: Run tests
-  #       run: hatch run +py=${{ matrix.python-version }} test:no-cov
-
-  # test:
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: pylint
-  #       run: pytest
-
-  #     - name: Run the tests via hatch
-  #       run: hatch run
+      - name: Run tests
+        run: hatch run +py=${{ matrix.python-version }} test:no-cov
 
   # lint:
   #   needs: build
