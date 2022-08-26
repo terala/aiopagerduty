@@ -61,7 +61,7 @@ cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov-report
 no-cov = "cov --no-cov"
 
 [[tool.hatch.envs.test.matrix]]
-python = ["38", "39", "310"]
+python = ["3.8", "3.9", "3.10"]
 
 [tool.hatch.envs.test.overrides]
 name.py311.env-vars = ["MULTIDICT_NO_EXTENSIONS=1", "YARL_NO_EXTENSIONS=1"]
