@@ -1,30 +1,14 @@
 """Unit tests for Service Orchestration
 """
 import json
-from typing import Callable, TypeVar, Optional, List, Dict
+from typing import Callable, Dict, List, Optional, TypeVar
 
 import aiopagerduty
 import pytest
 from aiopagerduty.models import ServiceOrchestration
 from assertpy import assert_that
 
-T = TypeVar("T")
-TArg = TypeVar("TArg")
-TResult = TypeVar("TResult")
-
-
-def find_matching(arr: List[T], pred_fn: Callable[[T], bool]) -> Optional[T]:
-    for x in arr:
-        if pred_fn(x) is True:
-            return x
-    return None
-
-
-def find_matching_or_throw(arr: List[T], pred_fn: Callable[[T], bool]) -> T:
-    val: T | None = find_matching(arr, pred_fn)
-    if val is None:
-        raise LookupError()
-    return val
+from .helpers import find_matching_or_throw
 
 
 def test_deserialize_empty_orchestration() -> None:
