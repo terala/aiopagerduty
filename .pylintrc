@@ -156,7 +156,7 @@ disable=abstract-method,
 # Set the output format. Available formats are text, parseable, colorized, msvs
 # (visual studio) and html. You can also give a reporter class, eg
 # mypackage.mymodule.MyReporterClass.
-output-format=text
+output-format=colorized
 
 # Tells whether to display a full report or only the messages
 reports=no
@@ -186,7 +186,7 @@ bad-names=
 name-group=
 
 # Include a hint for the correct naming format with invalid-name
-include-naming-hint=no
+include-naming-hint=yes
 
 # List of decorators that produce properties, such as abc.abstractproperty. Add
 # to this list to register other decorators that produce valid properties.
