@@ -1,0 +1,16 @@
+name: "Setup Hatch"
+description: "Install and setup hatch to build"
+inputs:
+  python-version:
+    description: "Python version"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Install hatch
+      run: pip install hatch
+      shell: sh
+
+    - name: "Creating test.${{ inputs.python-version }}"
+      run: hatch env create "test.py${{ inputs.python-version }}"
+      shell: sh
