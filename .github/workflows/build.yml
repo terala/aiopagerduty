@@ -98,3 +98,9 @@ jobs:
 
       - name: Run linters
         run: hatch run lint:all
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+      - name: "Dependency Review"
+        uses: actions/dependency-review-action@v2
